@@ -57,6 +57,7 @@ uint32_t adcvaluek;
 uint32_t adcvaluew;
 float sensork;
 float sensorw;
+int test = 0;
 
 /* USER CODE END PV */
 
@@ -84,7 +85,8 @@ static void MX_TIM3_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  TIM_OC_InitTypeDef testConfigOC = {0};
+	
   /* USER CODE END 1 */
   
 
@@ -114,9 +116,23 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start_IT(&htim14);
+	
+	
+	test = 15;
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	
+	testConfigOC.OCMode = TIM_OCMODE_PWM1;
+  testConfigOC.Pulse = test;
+  testConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  testConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	
+	if (HAL_TIM_PWM_ConfigChannel(&htim3, &testConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	
   /* USER CODE END 2 */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -136,6 +152,7 @@ int main(void)
 		uint8_t buffer[] = "Hello World";
 		
 		CDC_Transmit_FS(buffer, sizeof(buffer));
+		
 		HAL_Delay(1000);
   }
   /* USER CODE END 3 */
@@ -309,9 +326,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 32000;
+  htim3.Init.Prescaler = 6400;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 1000;
+  htim3.Init.Period = 100; //entspricht 20ms preiode
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -334,7 +351,7 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 500;
+  sConfigOC.Pulse = 5;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
